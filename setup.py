@@ -82,6 +82,4 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     install_require=["numpy", "scipy", "tensorflow>=1.4", "pickle"],
     packages=["nmjmc"],
-    test_suite="nose.collector",
-    tests_require=["nose"],
 )
