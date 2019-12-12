@@ -26,23 +26,27 @@ class MJMCSampler:
         self.N = dim // 2
         self.beta = beta
 
-    def run(self, X0, nsteps, reassign_labels=None, verbose=1, reporter=None):
+    def run(self, X0, nsteps, stride=1, reassign_labels=None, verbose=0, reporter=None):
         n_configs = X0.shape[0]
-        X = np.zeros((nsteps, n_configs, self.dim))
-        E = np.zeros((nsteps, n_configs))
+        X = np.zeros((nsteps // stride, n_configs, self.dim))
+        E_traj = np.zeros((nsteps // stride, n_configs))
         X[0] = X0
-        E[0] = self.energy_function(X[0])
         beta = self.beta
         y = np.zeros((n_configs, self.dim))
+        x = np.copy(X0)
+        E = self.energy_function(x)
+        E_traj[0] = E
         pacc = np.zeros(n_configs)
         E_new = np.zeros(n_configs)
         pacc_mean_local = np.zeros(nsteps)
         pacc_mean_global = np.zeros(nsteps)
+        max_index = (nsteps // stride) * stride
+        iterator = range(0, max_index)
 
         if reporter == "notebook":
-            iterator = tqdm_notebook(range(0, nsteps - 1))
+            iterator = tqdm_notebook(iterator)
         else:
-            iterator = tqdm(range(0, nsteps - 1))
+            iterator = tqdm(iterator)
         for i in iterator:
 
             randoms = np.random.rand(n_configs)
@@ -54,16 +58,14 @@ class MJMCSampler:
                     y[local_idcs],
                     pacc[local_idcs],
                     E_new[local_idcs],
-                ) = self.perform_local_step(
-                    X[i, local_idcs], E[i, local_idcs], beta=beta
-                )
+                ) = self.perform_local_step(x[local_idcs], E[local_idcs], beta=beta)
                 pacc_mean_local[i] = np.mean(pacc[local_idcs])
             if not len(global_idcs) == 0:
                 (
                     y[global_idcs],
                     pacc[global_idcs],
                     E_new[global_idcs],
-                ) = self.perform_global_step(X[i, global_idcs], beta=beta)
+                ) = self.perform_global_step(x[global_idcs], E[global_idcs], beta=beta)
                 pacc_mean_global[i] = np.mean(pacc[global_idcs])
 
             rands = np.random.rand(n_configs)
@@ -73,10 +75,12 @@ class MJMCSampler:
                 y_accepted = reassign_labels(y[accepted])
             else:
                 y_accepted = y[accepted]
-            X[i + 1, accepted] = y_accepted
-            E[i + 1, accepted] = E_new[accepted]
-            X[i + 1, rejected] = X[i, rejected]
-            E[i + 1, rejected] = E[i, rejected]
+            x[accepted] = np.copy(y_accepted)
+            E[accepted] = E_new[accepted]
+            if not i % stride:
+                index = i // stride
+                X[index] = np.copy(x)
+                E_traj[index] = np.copy(E)
 
         if verbose == 0:
             return X
@@ -93,21 +97,27 @@ class MJMCSampler:
         pacc = np.minimum(pacc, 1.0)
         return y, pacc, E_new
 
-    def perform_global_step(self, X, beta):
+    def perform_global_step(self, X, E, beta):
         kernel_output = self.nn.generate_output(X)
-        pacc = self.pacc_mh_np(kernel_output, beta=beta)
+        pacc, E_y = self.pacc_mh_np(kernel_output, E_x=E, beta=beta)
         pacc = np.minimum(pacc, 1.0)
-        return kernel_output["y"], pacc, self.energy_function(kernel_output["y"])
+        return kernel_output["y"], pacc, E_y
 
-    def pacc_mh_np(self, x, w=None, y=None, sigma_x=None, z=None, sigma_y=None, beta=1):
+    def pacc_mh_np(
+        self, x, w=None, y=None, sigma_x=None, z=None, sigma_y=None, E_x=None, beta=1
+    ):
         # got input x as dictionary
         if isinstance(x, dict):
             pred = x
             x, y, j_x = pred["x"], pred["y"], pred["j_x"]
         # compute energy difference
-        dE = self.energy_function(y) - self.energy_function(x)
-        pacc = np.exp(-beta * dE) * np.exp(np.sum(j_x, axis=1))
-        return pacc
+        if E_x is None:
+            E_x = self.energy_function(x)
+        E_y = self.energy_function(y)
+        dE = E_y - E_x
+        log_j_x = np.sum(j_x, axis=1)
+        pacc = np.exp(-beta * dE + log_j_x)
+        return pacc, E_y
 
 
 class VoronoiMixture:
