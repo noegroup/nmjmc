@@ -1,6 +1,6 @@
 import numpy as np
 import dill
-from metrogens.nn import RNVPNetwork, NeuralMJMCNetwork
+from nmjmc.nn import NeuralMJMCNetwork
 from tqdm import tqdm, tqdm_notebook
 
 
