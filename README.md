@@ -4,7 +4,7 @@ Python package that contains the core features for NMJMC training and data
 generation.
 
 ## Requirements
-Content of the paper has been generated with following python packages and verions
+Content of the paper has been generated with following python packages and versions
 tensorflow 1.14
 python 3.7
 numpy 1.17
