@@ -1,5 +1,4 @@
 import numpy as np
-from metrogens.util import callback_check_phase_space_volume, callback_neuralMJMC
 import tensorflow.keras as keras
 
 

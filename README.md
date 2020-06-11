@@ -11,6 +11,8 @@ numpy 1.17
 jupyter 1.0
 tqdm 4.36
 scipy 1.3
+dill 0.3
+matplotlib 3.1
 
 ## Install
 To use the package, install the requirements i.e. via conda and run 

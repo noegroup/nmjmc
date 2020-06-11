@@ -5,7 +5,7 @@ import os
 import tensorflow as tf
 import pickle
 from tensorflow import keras
-import metrogens.systems as systems
+import nmjmc.systems as systems
 from .revbase import ReversibleNetwork
 
 Model = keras.models.Model

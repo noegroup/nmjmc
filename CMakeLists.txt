@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.7)
-project(metrogens)
+project(nmjmc)
 set(CMAKE_CXX_STANDARD 11)
 
 FIND_PROGRAM(PYTHON "python")

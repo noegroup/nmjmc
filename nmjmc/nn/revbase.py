@@ -3,7 +3,7 @@ import uuid
 
 import tensorflow as tf
 import tensorflow.keras as keras
-import metrogens.systems as systems
+import nmjmc.systems as systems
 
 Model = keras.models.Model
 Add = keras.layers.Add
