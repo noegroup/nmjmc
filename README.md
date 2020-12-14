@@ -15,7 +15,7 @@ dill 0.3
 matplotlib 3.1
 
 ## Install
-Please make sure to pull all submodules before attempting installation by running
+Please make sure to pull all submodules before attempting installation, e.g. by running
 `
 git submodule update --init --recursive
 `
