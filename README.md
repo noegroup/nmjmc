@@ -15,6 +15,10 @@ dill 0.3
 matplotlib 3.1
 
 ## Install
+Please make sure to pull all submodules before attempting installation by running
+`
+git submodule update --init --recursive
+`
 To use the package, install the requirements i.e. via conda and run 
 `
 python setup.py install
