@@ -19,8 +19,10 @@ Please make sure to pull all submodules before attempting installation by runnin
 `
 git submodule update --init --recursive
 `
+.
 To use the package, install the requirements i.e. via conda and run 
 `
 python setup.py install
 `
+.
 This should allow you to run the ipython notebooks in the /notebooks folder.
